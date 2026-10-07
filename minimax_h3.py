@@ -23,6 +23,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 DEFAULT_BASE_URL = "https://argolink.io/v1"
 MODEL_ID = "minimax-h3"
+USER_AGENT = "minimax-h3-api/1.0"  # sent on every request, including upload PUTs
 
 # USD per billed second on 2026-10-07 (https://argolink.io/en/models/minimax-h3).
 # Re-check the model page before budgeting; it wins if the numbers differ.
@@ -146,6 +147,7 @@ class MiniMaxH3:
         data = None if body is None else json.dumps(body).encode("utf-8")
         req = urllib.request.Request(self.base_url + path, data=data, method=method)
         req.add_header("Authorization", "Bearer " + self.api_key)
+        req.add_header("User-Agent", USER_AGENT)
         req.add_header("Accept", "video/mp4" if raw else "application/json")
         if data is not None:
             req.add_header("Content-Type", "application/json")
@@ -221,6 +223,7 @@ class MiniMaxH3:
         with open(file_path, "rb") as handle:
             put = urllib.request.Request(ticket["upload_url"], data=handle.read(), method="PUT")
         put.add_header("Content-Type", content_type)  # must equal the declared type
+        put.add_header("User-Agent", USER_AGENT)
         try:
             urllib.request.urlopen(put, timeout=self.timeout).close()
         except urllib.error.HTTPError as err:

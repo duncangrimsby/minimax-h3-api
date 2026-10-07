@@ -111,6 +111,7 @@ def test_generate_runs_submit_poll_download(api, tmp_path):
     submit = fake.requests[0]
     assert submit.full_url == "https://argolink.io/v1/videos/generations"
     assert submit.get_header("Authorization") == "Bearer k"
+    assert all(r.get_header("User-agent") == "minimax-h3-api/1.0" for r in fake.requests)
     assert json.loads(submit.data)["resolution"] == "2k"
     assert fake.requests[-1].full_url.endswith("/videos/job-1/content")
     assert out.read_bytes().startswith(b"\x00\x00\x00\x18ftyp")
@@ -128,6 +129,7 @@ def test_local_reference_is_uploaded_with_its_content_type(api, tmp_path):
     put = fake.requests[1]
     assert put.get_method() == "PUT" and put.get_header("Content-type") == "image/png"
     assert put.get_header("Authorization") is None  # the signed URL carries its own auth
+    assert put.get_header("User-agent") == "minimax-h3-api/1.0"
     assert json.loads(fake.requests[2].data)["reference_images"] == [{"url": "https://media.test/abc.png"}]
 
 
